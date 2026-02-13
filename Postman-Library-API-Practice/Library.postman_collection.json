@@ -1,0 +1,390 @@
+{
+	"info": {
+		"_postman_id": "20d17b29-30f1-47c4-b63d-f3baaf4a701b",
+		"name": "Library",
+		"description": "Collection of Add / Search / Remove the book from Library - Using API requests.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46561067",
+		"_collection_link": "https://www.postman.com/karan-5345533/workspace/automation-testing-postman/collection/46561067-20d17b29-30f1-47c4-b63d-f3baaf4a701b?action=share&source=collection_link&creator=46561067"
+	},
+	"item": [
+		{
+			"name": "Add_Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//***** Assertions Validations - Based on Response ****** \r",
+							"\r",
+							"//****Tests for Status Code Validations\r",
+							"\r",
+							"// To convert Response Body into JSON object\r",
+							"pm.collectionVariables.set(\"flag\",false);\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							" // To convert Body into JSON format using JSON.parse feature \r",
+							"var req = JSON.parse(pm.request.body.raw);\r",
+							"\r",
+							"\r",
+							"// To parse Book ID automatically into all API requests generated through Add_Book request\r",
+							"console.log(jsonData);\r",
+							"const bookId = jsonData.ID;\r",
+							"pm.environment.set(\"book_id\", bookId);\r",
+							"\r",
+							"\r",
+							"function cleanupScript()\r",
+							"{\r",
+							"  const book_id = generateBookId(); \r",
+							"  pm.environment.set(\"book_id\", book_id);\r",
+							"  pm.collectionVariables.set(\"flag\",true);\r",
+							"  pm.execution.setNextRequest(\"Remove_Book\");\r",
+							"  //Postman.pm.execution.setNextRequest(\"Remove_Book\");\r",
+							"  // Postman.setNextRequest(\"Remove_Book\");\r",
+							"}\r",
+							"\r",
+							"function generateBookId()\r",
+							"{\r",
+							" const expected_id = req.isbn + req.aisle;\r",
+							" return expected_id;\r",
+							"\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validate the Status Code is 200\", function () {\r",
+							"\r",
+							"    try {\r",
+							"    // Validate Status Code is showing OK (200) response or not\r",
+							"    pm.response.to.have.status(200);\r",
+							"\r",
+							"    // Validate JSON Body is having \"Msg\" as a property or not with the use of JSON Object\r",
+							"    pm.expect(jsonData).have.property(\"Msg\");\r",
+							"\r",
+							"    // Validate \"Msg\" property showing with message as \"successfully added\" or not\r",
+							"    pm.expect(jsonData.Msg).to.eql(\"successfully added\");\r",
+							"    }\r",
+							"\r",
+							"    catch(e)\r",
+							"    {\r",
+							"      if(jsonData.Msg.includes(\"Already Exists\"))\r",
+							"        {\r",
+							"          cleanupScript();\r",
+							"        }\r",
+							"    }\r",
+							"\r",
+							"});\r",
+							"\r",
+							"//****Tests for Header & Cookies Response Time Validations\r",
+							"\r",
+							"pm.test(\"Headers & Cookies Response Time Validations\", function () {\r",
+							"    // Validate Header type is present or not\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"\r",
+							"    // Validate Header type's value is present or not\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json;charset=UTF-8\");\r",
+							"\r",
+							"    // Response in milliseconds\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+							"\r",
+							"    // Validate some text from Response Body in Text format\r",
+							"    pm.expect(pm.response.text()).to.include(\"successfully added\");\r",
+							"\r",
+							"});\r",
+							"\r",
+							"//****Tests for Header & Cookies Response Time Validations\r",
+							"\r",
+							"pm.test(\"Generated Book ID Validation Logic\", function () {\r",
+							"    // To store the Collection level variable value into another temp variable \r",
+							"  //  const isbn_val = pm.collectionVariables.get(\"isbn\");\r",
+							"\r",
+							"    //To store the Request Body Aisle data into another temp variable\r",
+							"   // const aisle_val = req.aisle;\r",
+							"\r",
+							"    // To store the final logic of Book ID into an variable \r",
+							"   // const expected_id = isbn_val + aisle_val;\r",
+							"\r",
+							"    // To validate the Generated Book ID logic\r",
+							"    const expected_id = generateBookId();\r",
+							"    pm.expect(expected_id).to.eql(bookId);\r",
+							"\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//RS123456 \r",
+							"\r",
+							"console.log(pm.globals.get(\"companyCode\"));\r",
+							"const code = pm.globals.get(\"companyCode\");\r",
+							"const val = pm.variables.replaceIn('{{$randomInt}}');\r",
+							"pm.collectionVariables.set(\"isbn\", code + val);\r",
+							"pm.collectionVariables.set(\"book_name\", pm.iterationData.get(\"Book_Name\"));\r",
+							"console.log(pm.collectionVariables.get(\"book_name\"));\r",
+							"pm.collectionVariables.set(\"author_name\", pm.iterationData.get(\"Book_Author\"));\r",
+							"console.log(pm.collectionVariables.get(\"author_name\"));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{book_name}}\",\r\n    \"isbn\": \"{{isbn}}\",    \r\n    \"aisle\": \"777\",\r\n    \"author\": \"{{author_name}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Base_URI}}/Library/Addbook.php",
+					"host": [
+						"{{Base_URI}}"
+					],
+					"path": [
+						"Library",
+						"Addbook.php"
+					]
+				},
+				"description": "**Add_Book** : This is **POST** type API request used for adding the new books into to the Library.\n\n**Base URI:** [https://rahulshettyacademy.com](https://rahulshettyacademy.com)\n\n**Parameters:** /Library/Addbook.php[](http://216.10.245.166)\n\n<u><b>Note</b></u><u>-</u> _aisle value should be number only. Isbn should be unique to insert. So provide random isbn which makes unique._"
+			},
+			"response": []
+		},
+		{
+			"name": "Search_Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//To capture the JSON resonse into a Variable\r",
+							"const searchBookResponse = pm.response.json();\r",
+							"\r",
+							"//To store the Schema to be validated into an Variable\r",
+							"const searchBookSchema = {\r",
+							"    \"type\": \"array\",\r",
+							"    \"items\": [\r",
+							"        {\r",
+							"            \"type\": \"object\",\r",
+							"            \"properties\": {\r",
+							"                \"book_name\": {\r",
+							"                    \"type\": \"string\"\r",
+							"                },\r",
+							"                \"isbn\": {\r",
+							"                    \"type\": \"string\"\r",
+							"                },\r",
+							"                \"aisle\": {\r",
+							"                    \"type\": \"string\"\r",
+							"                },\r",
+							"                \"author\": {\r",
+							"                    \"type\": \"string\"\r",
+							"                }\r",
+							"            },\r",
+							"            \"required\": [\r",
+							"                \"book_name\",\r",
+							"                \"isbn\",\r",
+							"                \"aisle\",\r",
+							"                \"author\"\r",
+							"            ]\r",
+							"        }\r",
+							"    ]\r",
+							"};\r",
+							"\r",
+							"//Tests to Validate the JSON Response Logic\r",
+							"pm.test(\"Validate the JSON Response Logic\", function () {\r",
+							"    //To Print the Variable Value  \r",
+							"    console.log(searchBookResponse);\r",
+							"\r",
+							"    //To compare the respnse of Author value from Search Book Respnse with Add Book Response\r",
+							"    pm.expect(searchBookResponse[0].author).to.eql(pm.collectionVariables.get(\"author_name\"));\r",
+							"\r",
+							"    //To compare the respnse of ISBn value from Search Book Respnse with Add Book Response\r",
+							"    pm.expect(searchBookResponse[0].isbn).to.eql(pm.collectionVariables.get(\"isbn\"));\r",
+							"\r",
+							"}\r",
+							");\r",
+							"\r",
+							"//Tests to Validate the JSON Response Schema\r",
+							"//Fork Test\r",
+							"pm.test(\"Validate the JSON Response Status Code & Schema\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.jsonSchema(searchBookSchema);\r",
+							"\r",
+							"});    "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{Base_URI}}/Library/GetBook.php?ID={{book_id}}",
+					"host": [
+						"{{Base_URI}}"
+					],
+					"path": [
+						"Library",
+						"GetBook.php"
+					],
+					"query": [
+						{
+							"key": "ID",
+							"value": "{{book_id}}"
+						}
+					]
+				},
+				"description": "**Search_Book** : This is **GET** type API request used for adding the new books into to the Library.\n\n**Base URI:** [https://rahulshettyacademy.com](https://rahulshettyacademy.com)\n\n**Parameters:** /Library/GetBook.php?ID=3389\n\n<u><b>Note</b></u>: ID should be unique in order to search the desired book into the Library."
+			},
+			"response": []
+		},
+		{
+			"name": "Remove_Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const removeBookSchema = {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"        \"msg\": {\r",
+							"            \"type\": \"string\"\r",
+							"        }\r",
+							"    },\r",
+							"    \"required\": [\r",
+							"        \"msg\"\r",
+							"    ]\r",
+							"};\r",
+							"\r",
+							"//Tests to Validate the JSON Response Status & Schema\r",
+							"\r",
+							"pm.test(\"Validate the JSON Response Status Code & Schema\", function () {\r",
+							"    //To Validate the Status Code\r",
+							"    pm.response.to.have.status(200);\r",
+							"\r",
+							"    //To store the response JSON into an variable\r",
+							"    const jsonData = pm.response.json();\r",
+							"\r",
+							"    //To validate the JSON Response Msg value\r",
+							"    pm.expect(jsonData.msg).to.eql(\"book is successfully deleted\");\r",
+							"\r",
+							"    //To Validate the JSON Schema\r",
+							"    pm.response.to.have.jsonSchema(removeBookSchema);\r",
+							"\r",
+							"    if (pm.collectionVariables.get(\"flag\")) \r",
+							"    {\r",
+							"        let counter = pm.variables.get(\"loopCounter\") || 0;\r",
+							"        counter++;\r",
+							"        if (counter < 5) {\r",
+							"        pm.variables.set(\"loopCounter\", counter);\r",
+							"        \r",
+							"        pm.execution.setNextRequest(\"Add_Book\");\r",
+							"        }\r",
+							"        else {\r",
+							"    pm.execution.setNextRequest(null);\r",
+							"        //Postman.pm.execution.setNextRequest(\"Add_Book\");\r",
+							"        // Postman.setNextRequest(\"Add_Book\");\r",
+							"    }\r",
+							"}});   "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n \r\n\"ID\" : \"{{book_id}}\"\r\n \r\n} \r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Base_URI}}/Library/DeleteBook.php",
+					"host": [
+						"{{Base_URI}}"
+					],
+					"path": [
+						"Library",
+						"DeleteBook.php"
+					]
+				},
+				"description": "**Remove_Book** : This is **GET** type API request used for adding the new books into to the Library.\n\n**Base URI:** [https://rahulshettyacademy.com](https://rahulshettyacademy.com)\n\n**Parameters:** /Library/DeleteBook.php\n\n<u><b>Note</b></u>: ID should be unique in order to remove/delete the desired book from library."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "isbn",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "author_name",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "book_name",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "flag",
+			"value": "false",
+			"type": "string"
+		}
+	]
+}
