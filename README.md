@@ -80,6 +80,8 @@ This demonstrates how APIs interact with each other using dynamic data and valid
    * `QA_Environment.postman_environment.json`
 4. Select **QA_Environment** from environment dropdown.
 5. Run the collection using **Collection Runner**.
+6. To execute data-driven tests, upload `test-data/books.csv` in Collection Runner.
+
 
 ---
 
